@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+      text-align: left;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #4CAF50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    p {
+      font-size: 14px;
+      color: #777;
+    }
+
+    p a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+
+    p a:hover {
+      text-decoration: underline;
+    }
+
+    #recaptcha-container {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Register</h1>
+    <form id="registerForm">
+      <label for="phone">Nomor HP</label>
+      <input type="tel" id="phone" placeholder="+62xxxxxxxxxx" required>
+      <div id="recaptcha-container"></div>
+      <button type="button" id="sendCode">Kirim Kode</button>
+      <label for="otp">Kode OTP</label>
+      <input type="text" id="otp" placeholder="Masukkan kode OTP" required>
+      <button type="button" id="verifyCode">Verifikasi</button>
+    </form>
+    <p>Sudah punya akun? <a href="login.html">Login di sini</a>.</p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxObEzZ78fRjPaD7ULsSlgSnBC93abE30",
+      authDomain: "eqchatapp-6e6d1.firebaseapp.com",
+      projectId: "eqchatapp-6e6d1",
+      storageBucket: "eqchatapp-6e6d1.firebasestorage.app",
+      messagingSenderId: "33030317902",
+      appId: "1:33030317902:web:bbb164acd302ca93d6e01f",
+      measurementId: "G-GVW4Q1PG0C"
+    };
+
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Setup reCAPTCHA
+    const recaptchaVerifier = new RecaptchaVerifier("recaptcha-container", {}, auth);
+    recaptchaVerifier.render();
+
+    // Kirim kode OTP
+    document.getElementById("sendCode").addEventListener("click", () => {
+      const phoneNumber = document.getElementById("phone").value;
+      signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          alert("Kode OTP dikirim!");
+        })
+        .catch((error) => {
+          console.error(error);
+          alert("Gagal mengirim kode OTP. Periksa nomor HP Anda!");
+        });
+    });
+
+    // Verifikasi kode OTP
+    document.getElementById("verifyCode").addEventListener("click", () => {
+      const code = document.getElementById("otp").value;
+      window.confirmationResult
+        .confirm(code)
+        .then((result) => {
+          alert("Verifikasi berhasil! Selamat datang!");
+          // Redirect ke halaman lain
+          window.location.href = "chat.html";
+        })
+        .catch((error) => {
+          console.error(error);
+          alert("Kode OTP salah atau sudah kadaluarsa!");
+        });
+    });
+  </script>
+</body>
+</html>
